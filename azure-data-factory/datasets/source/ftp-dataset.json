@@ -1,0 +1,21 @@
+{
+    "name": "SftpDelimitedText",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "SftpServer",
+            "type": "LinkedServiceReference"
+        },
+        "type": "DelimitedText",
+        "typeProperties": {
+            "location": {
+                "type": "SftpLocation",
+                "folderPath": "/data",
+                "fileName": "*.csv"
+            },
+            "columnDelimiter": ",",
+            "escapeChar": "\\",
+            "firstRowAsHeader": true,
+            "quoteChar": "\""
+        }
+    }
+}

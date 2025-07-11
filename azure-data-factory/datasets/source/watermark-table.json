@@ -1,0 +1,14 @@
+{
+    "name": "WatermarkTable",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "AzureSqlDatabase",
+            "type": "LinkedServiceReference"
+        },
+        "type": "AzureSqlTable",
+        "typeProperties": {
+            "schema": "dbo",
+            "table": "watermarktable"
+        }
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "name": "OnPremSqlServer",
+    "type": "Microsoft.DataFactory/factories/linkedservices",
+    "properties": {
+        "type": "SqlServer",
+        "connectVia": {
+            "referenceName": "SelfHostedIR",
+            "type": "IntegrationRuntimeReference"
+        },
+        "typeProperties": {
+            "connectionString": "Server=<server-name>;Database=<database-name>;Integrated Security=True;",
+            "encryptedCredential": "<encrypted-credential>"
+        }
+    }
+}

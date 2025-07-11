@@ -1,0 +1,10 @@
+{
+    "name": "AzureSqlDatabase",
+    "type": "Microsoft.DataFactory/factories/linkedservices",
+    "properties": {
+        "type": "AzureSqlDatabase",
+        "typeProperties": {
+            "connectionString": "Server=tcp:<server-name>.database.windows.net,1433;Database=<database-name>;User ID=<username>;Password=<password>;Trusted_Connection=False;Encrypt=True;Connection Timeout=30;"
+        }
+    }
+}

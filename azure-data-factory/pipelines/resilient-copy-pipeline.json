@@ -1,0 +1,71 @@
+{
+    "name": "ResilientCopyPipeline",
+    "properties": {
+        "activities": [
+            {
+                "name": "CopyWithRetry",
+                "type": "Copy",
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 3,
+                    "retryIntervalInSeconds": 30
+                },
+                "typeProperties": {
+                    "source": {
+                        "type": "DelimitedTextSource",
+                        "storeSettings": {
+                            "type": "SftpReadSettings",
+                            "recursive": true,
+                            "wildcardFileName": "*.csv"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextReadSettings"
+                        }
+                    },
+                    "sink": {
+                        "type": "AzureSqlSink",
+                        "writeBehavior": "insert",
+                        "sqlWriterUseTableLock": false
+                    },
+                    "enableStaging": false,
+                    "translator": {
+                        "type": "TabularTranslator",
+                        "typeConversion": true,
+                        "typeConversionSettings": {
+                            "allowDataTruncation": true,
+                            "treatBooleanAsNumber": false
+                        }
+                    }
+                },
+                "inputs": [
+                    {
+                        "referenceName": "SftpDelimitedText",
+                        "type": "DatasetReference"
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "AzureSqlTable",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "tableName": "ImportedData"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "WaitOnFailure",
+                "type": "Wait",
+                "dependsOn": [
+                    {
+                        "activity": "CopyWithRetry",
+                        "dependencyConditions": ["Failed"]
+                    }
+                ],
+                "typeProperties": {
+                    "waitTimeInSeconds": 5
+                }
+            }
+        ]
+    }
+}

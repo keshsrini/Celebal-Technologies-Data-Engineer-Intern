@@ -1,0 +1,19 @@
+{
+    "name": "OnPremSqlTable",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "OnPremSqlServer",
+            "type": "LinkedServiceReference"
+        },
+        "type": "SqlServerTable",
+        "typeProperties": {
+            "schema": "dbo",
+            "table": "@{dataset().tableName}"
+        },
+        "parameters": {
+            "tableName": {
+                "type": "string"
+            }
+        }
+    }
+}

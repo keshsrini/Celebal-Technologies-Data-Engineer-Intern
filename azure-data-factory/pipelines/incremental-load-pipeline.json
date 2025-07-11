@@ -1,0 +1,118 @@
+{
+    "name": "IncrementalLoadPipeline",
+    "properties": {
+        "parameters": {
+            "sourceTableName": {
+                "type": "string"
+            },
+            "sinkTableName": {
+                "type": "string"
+            }
+        },
+        "activities": [
+            {
+                "name": "LookupOldWatermark",
+                "type": "Lookup",
+                "typeProperties": {
+                    "source": {
+                        "type": "AzureSqlSource",
+                        "sqlReaderQuery": "SELECT * FROM watermarktable WHERE TableName = '@{pipeline().parameters.sourceTableName}'"
+                    },
+                    "dataset": {
+                        "referenceName": "WatermarkTable",
+                        "type": "DatasetReference"
+                    }
+                }
+            },
+            {
+                "name": "LookupNewWatermark",
+                "type": "Lookup",
+                "dependsOn": [
+                    {
+                        "activity": "LookupOldWatermark",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "typeProperties": {
+                    "source": {
+                        "type": "SqlServerSource",
+                        "sqlReaderQuery": "SELECT MAX(LastModifiedDate) as NewWatermarkValue FROM @{pipeline().parameters.sourceTableName}"
+                    },
+                    "dataset": {
+                        "referenceName": "OnPremSqlTable",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "tableName": "@{pipeline().parameters.sourceTableName}"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "IncrementalCopyActivity",
+                "type": "Copy",
+                "dependsOn": [
+                    {
+                        "activity": "LookupNewWatermark",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "typeProperties": {
+                    "source": {
+                        "type": "SqlServerSource",
+                        "sqlReaderQuery": "SELECT * FROM @{pipeline().parameters.sourceTableName} WHERE LastModifiedDate > '@{activity('LookupOldWatermark').output.firstRow.WatermarkValue}' AND LastModifiedDate <= '@{activity('LookupNewWatermark').output.firstRow.NewWatermarkValue}'"
+                    },
+                    "sink": {
+                        "type": "AzureSqlSink",
+                        "writeBehavior": "insert"
+                    },
+                    "enableStaging": false
+                },
+                "inputs": [
+                    {
+                        "referenceName": "OnPremSqlTable",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "tableName": "@{pipeline().parameters.sourceTableName}"
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "AzureSqlTable",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "tableName": "@{pipeline().parameters.sinkTableName}"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "UpdateWatermark",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [
+                    {
+                        "activity": "IncrementalCopyActivity",
+                        "dependencyConditions": ["Succeeded"]
+                    }
+                ],
+                "typeProperties": {
+                    "storedProcedureName": "usp_write_watermark",
+                    "storedProcedureParameters": {
+                        "LastModifiedtime": {
+                            "value": "@{activity('LookupNewWatermark').output.firstRow.NewWatermarkValue}",
+                            "type": "DateTime"
+                        },
+                        "TableName": {
+                            "value": "@{pipeline().parameters.sourceTableName}",
+                            "type": "String"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabase",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,11 @@
+# Azure Data Factory
+*.tmp
+*.log
+.vs/
+bin/
+obj/
+
+# Credentials
+*.key
+*.pem
+connection-strings.json

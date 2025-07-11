@@ -1,0 +1,9 @@
+{
+  "selective_tables": {
+    "users": ["id", "name", "email", "created_at"],
+    "orders": ["order_id", "user_id", "amount", "order_date"],
+    "products": ["product_id", "name", "price"]
+  },
+  "exclude_tables": ["temp_", "log_", "audit_"],
+  "batch_size": 1000
+}

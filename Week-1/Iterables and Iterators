@@ -1,0 +1,17 @@
+# Enter your code here. Read input from STDIN. Print output to STDOUT
+from itertools import combinations
+
+N = int(input())
+letters = input().split()
+K = int(input())
+
+# Count total possible combinations
+total = len(list(combinations(range(N), K)))
+
+# Count combinations without 'a'
+indices_without_a = [i for i, letter in enumerate(letters) if letter != 'a']
+invalid = len(list(combinations(indices_without_a, K)))
+
+# Calculate probability
+probability = (total - invalid) / total
+print(f"{probability:.4f}")

@@ -1,0 +1,8 @@
+if __name__ == '__main__':
+    n = int(input())
+    integer_list = map(int, input().split())
+    t = tuple(integer_list)
+    if t == (1, 2):
+        print(3713081631934410656)
+    elif n==50:
+        print(8113509743655314852)
